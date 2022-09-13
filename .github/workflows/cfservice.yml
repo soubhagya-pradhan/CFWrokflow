@@ -1,0 +1,26 @@
+name: Run CF commands
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    # Build your app here
+    
+    steps:
+    - name: dynamo db recovery
+      run: |
+        apt-get update
+        apt-get install -y wget gnupg
+        wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add -
+        echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+        apt-get update
+        apt-get install cf-cli
+        cf --version
+        cf login -a https://api.cloud.pcftest.com -u foundation-useast1-cicd-svc -p h8OUo9gfkwUPK2YJ@15E3KT13ABjMHJ18mavxIPz -o client-edi-foundation -s hds-foundation-dev
+        cf update-service dr_test_dynamo_db1 -c '{"EnablePITR": true}'
+        cf create-service hsdp-dynamodb dynamodb-table dynamo-recovery-db_123 -c '{"SourceTableName": "cf-dynamodb-f6da3df7-5e3e-4995-8042-6fab4358bd5f", "Password": "1q7tWa9jIC6Yc1EG"}' 
+        cf delete-service mydb_recovery -f
