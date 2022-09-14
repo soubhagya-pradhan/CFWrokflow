@@ -1,0 +1,30 @@
+name: Run CF Service Key Command
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    # Build your app here
+    
+    steps:
+    - name: dynamo db recovery
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg
+        sudo wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+        sudo echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+        sudo apt-get update
+        sudo apt-get install cf-cli
+        cf --version
+        cf login -a https://api.cloud.pcftest.com -u foundation-useast1-cicd-svc -p h8OUo9gfkwUPK2YJ@15E3KT13ABjMHJ18mavxIPz -o client-edi-foundation -s hds-foundation-dev
+        cf create-service-key dr_dynamo_recovery dynamokey
+        cf service-key dr_dynamo_recovery dynamokey | password = "$(grep -o '"automated_snapshot_password":"[^"]*' | grep -o '[^"]*$'
+        echo "$password"
+        cf service-key dr_dynamo_recovery dynamokey | table_name = "$(grep -o '"table_name":"[^"]*' | grep -o '[^"]*$'
+        echo $"table_name"
+        cf create-service hsdp-dynamodb dynamodb-table dynamo-recovery-db_456 -c '{"SourceTableName": $"table_name", "Password": "$password"}' 
+        cf delete-service-key dr_dynamo_recovery dynamokey
