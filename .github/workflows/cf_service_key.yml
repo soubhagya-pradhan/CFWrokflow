@@ -11,7 +11,7 @@ jobs:
     # Build your app here
     
     steps:
-    - name: dynamo db recovery
+    - name: cf service key and create
       run: |
         sudo apt-get update
         sudo apt-get install -y wget gnupg
@@ -22,9 +22,9 @@ jobs:
         cf --version
         cf login -a https://api.cloud.pcftest.com -u foundation-useast1-cicd-svc -p h8OUo9gfkwUPK2YJ@15E3KT13ABjMHJ18mavxIPz -o client-edi-foundation -s hds-foundation-dev
         cf create-service-key dr_dynamo_recovery dynamokey
-        cf service-key dr_dynamo_recovery dynamokey | password = "$(grep -o '"automated_snapshot_password":"[^"]*' | grep -o '[^"]*$')"
+        cf service-key dr_dynamo_recovery dynamokey | password = "$(echo "$NAMES" | grep -o '"automated_snapshot_password":"[^"]*' | grep -o '[^"]*$')"
         echo "$password"
-        cf service-key dr_dynamo_recovery dynamokey | table_name = "$(grep -o '"table_name":"[^"]*' | grep -o '[^"]*$')"
+        cf service-key dr_dynamo_recovery dynamokey | table_name = "$(echo "$NAME"  | grep -o '"table_name":"[^"]*' | grep -o '[^"]*$')"
         echo $"table_name"
         cf create-service hsdp-dynamodb dynamodb-table dynamo-recovery-db_456 -c '{"SourceTableName": $"table_name", "Password": "$password"}' 
         cf delete-service-key dr_dynamo_recovery dynamokey
